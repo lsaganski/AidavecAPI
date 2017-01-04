@@ -35,6 +35,7 @@ app.post('/api/login/', function(req, res) {
 	});
 });
 
+// UPLOAD
 app.post('/api/upload', function(req, res){
 
   // create an incoming form object
@@ -67,6 +68,7 @@ app.post('/api/upload', function(req, res){
 
 });
 
+//GET FILE
 app.get('/api/images/:file', function (req, res){
     file = req.params.file;
     var dirname = path.join(__dirname, '/uploads');
@@ -78,7 +80,6 @@ app.get('/api/images/:file', function (req, res){
 // Check if email is already regsitered
 app.post('/api/checkemail/', function(req, res) {
 	var conn = database();
-
 	var email = req.body.email;
 
 	conn.query('SELECT * FROM AIDAVEC_USER WHERE USR_EMAIL = \'' + email + '\'', function(err,result){
@@ -89,7 +90,6 @@ app.post('/api/checkemail/', function(req, res) {
 // CRUD GetAll
 app.get('/api/:tablename', function(req, res) {
 	var conn = database();
-
 	var tablename = req.params.tablename;
 
 	conn.query('SELECT * FROM ' + tablename, function(err,result){
@@ -97,16 +97,54 @@ app.get('/api/:tablename', function(req, res) {
 	});
 });
 
+// CRUD Get Notes
+app.get('/api/notes/:userid', function(req, res) {
+	var conn = database();
+	var userid = req.params.userid;
+
+	conn.query('SELECT * FROM AIDAVEC_NOTIFICACAO WHERE USR_ID = ' + userid, function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Get Vehicle
+app.get('/api/vehicle/:userid', function(req, res) {
+	var conn = database();
+	var userid = req.params.userid;
+
+	conn.query('SELECT * FROM AIDAVEC_VEICULO WHERE USR_ID = ' + userid, function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Get User
+app.get('/api/user/:userid', function(req, res) {
+	var conn = database();
+	var userid = req.params.userid;
+
+	conn.query('SELECT * FROM AIDAVEC_USER WHERE USR_ID = ' + userid, function(err,result){
+		return res.json(result);
+	});
+});
+
 // CRUD Insert
 app.post('/api/user', function(req, res) {
 	var conn = database();
-
  	var data = req.body;
 
 	conn.query('INSERT INTO AIDAVEC_USER SET ? ', [data], function(err,result){
 
 		SendMail(data.USR_EMAIL, result.insertId);
+		return res.json(result);
+	});
+});
 
+// CRUD Insert
+app.post('/api/vehicle', function(req, res) {
+	var conn = database();
+	var data = req.body;
+
+	conn.query('INSERT INTO AIDAVEC_VEICULO SET ? ', [data], function(err,result){
 		return res.json(result);
 	});
 });
@@ -114,11 +152,8 @@ app.post('/api/user', function(req, res) {
 // CRUD Insert
 app.post('/api/waypoints', function(req, res) {
 	var conn = database();
-
  	var data = req.body; 
-
  	var result = 'T';
-
  	success = true;
 
  	for (var index in data.waypoints) {
@@ -132,6 +167,31 @@ app.post('/api/waypoints', function(req, res) {
 
 	return res.sendStatus(success ? 200 : 501);
 });
+
+// CRUD Update
+app.put('/api/user', function(req, res) {
+	var conn = database();
+ 	var data = req.body;
+
+	conn.query('UPDATE AIDAVEC_USER SET USR_NOME = \'' + [data.USR_NOME] + '\', USR_SOBRENOME = \'' + [data.USR_SOBRENOME] + '\', USR_EMAIL = \'' + [data.USR_EMAIL] + '\', USR_TELEFONE = \'' + [data.USR_TELEFONE] + '\', USR_UF = \'' + [data.USR_UF] + '\', USR_CIDADE = \'' + [data.USR_CIDADE] + '\', USR_STATUS = '+ [data.USR_STATUS] + ', USR_SENHA = ' + ([data.USR_SENHA] == null ? 'USR_SENHA' : ('\'' + [data.USR_SENHA] + '\'') ) + ' WHERE USR_ID = ' + [data.USR_ID], function(err,result){
+
+		if (data.USR_STATUS == 0)
+			SendMail(data.USR_EMAIL, [data.USR_ID]);
+
+		return res.json(result);
+	});
+});
+
+// CRUD Update
+app.put('/api/vehicle', function(req, res) {
+	var conn = database();
+ 	var data = req.body;
+
+	conn.query('UPDATE AIDAVEC_VEICULO SET VEI_MARCA = \'' + [data.VEI_MARCA] + '\', VEI_MODELO = \'' + [data.VEI_MODELO] + '\', VEI_COR = \'' + [data.VEI_COR] + '\', VEI_ANO = ' + [data.VEI_ANO] + ', VEI_COBERTURA = ' + [data.VEI_COBERTURA] + ' WHERE VEI_ID = ' + [data.VEI_ID], function(err,result){
+		return res.json(result);
+	});
+});
+
 
 function SaveWaypoint(data, conn) {
 	conn.query('INSERT INTO AIDAVEC_WAYPOINT SET ? ', [data], function(err,result){
@@ -154,21 +214,6 @@ app.get('/api/active/user/:id', function(req, res) {
 	});
 });
 
-// CRUD GetObject
-app.get('/api/:tablename/:id', function(req, res) {
-
-	console.log('Entrou no getobj');
-	var conn = database();
-
-});
-
-// CRUD UpdateObject
-app.put('/api/:tablename/:id', function(req, res) {
-
-	console.log('Entrou no update');
-	var conn = database();
-
-});
 
 // CRUD DeleteObject
 app.delete('/api/:tablename/:id', function(req, res) {
