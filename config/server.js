@@ -150,6 +150,19 @@ app.post('/api/vehicle', function(req, res) {
 });
 
 // CRUD Insert
+app.post('/api/notes', function(req, res) {
+	var conn = database();
+	var data = req.body;
+
+	conn.query('INSERT INTO AIDAVEC_NOTIFICACAO SET ? ', [data], function(err,result){
+		if (data.NOT_PUSH == 1)
+			SendPush(data);
+
+		return res.json(result);
+	});
+});
+
+// CRUD Insert
 app.post('/api/waypoints', function(req, res) {
 	var conn = database();
  	var data = req.body; 
@@ -247,6 +260,63 @@ function SendMail(address, id) {
 	transporter.sendMail(email, function(err, info){
   		if(err)
     		throw err; // Oops, algo de errado aconteceu.
+	});
+}
+
+function SendPush(data) {
+	var conn = database();
+	var FCM = require('fcm-push');
+
+	var serverKey = 'AAAARhibgJE:APA91bEtTC0e8pQlBll010FKGow46EoNqVkEJpQRXWMwnI4a33YabwXpsmv9fGkpwAd3uGS9xZ3ZSJIiklhSnK7ChZwxHFRLG2LDFsarfBZ7099ItTMNKt-S6FRmoDKZiOLgzbND3XSN1Dglcp-e1b4M_McoMFUz7g';
+	var fcm = new FCM(serverKey);
+
+	var query = '';
+
+	if (data.USR_ID != null && data.USR_ID.length > 0) {
+		query = 'SELECT * FROM AIDAVEC_USER WHERE USR_ID = ' + data.USR_ID;
+		console.log('enviou apenas para o ' + data.USR_ID);
+	} else {
+		query = 'SELECT * FROM AIDAVEC_USER';
+		console.log('Enviou para todos');
+	}
+
+	conn.query(query, function(err, rows, fields) {
+	    if (err) throw err;
+
+	    for (var i in rows) {
+	        var message = {
+			    to: rows[i].USR_DEVICE, // required fill with device token or topics
+	//		    collapse_key: 'your_collapse_key', 
+			    data: {
+			        'NOT_TITULO': data.NOT_TITULO,
+			        'NOT_MENSAGEM': data.NOT_MENSAGEM,
+			        'NOT_TIPO': data.NOT_TIPO,
+			        'NOT_OPCAOA': data.NOT_OPCAOA,
+			        'NOT_OPCAOB': data.NOT_OPCAOB,
+			        'NOT_OPCAOC': data.NOT_OPCAOC,
+			        'NOT_OPCAOD': data.NOT_OPCAOD,
+			        'NOT_OPCAOE': data.NOT_OPCAOE
+			    },
+			    notification: {
+			        title: data.NOT_TITULO,
+			        body: data.NOT_MENSAGEM
+			    }
+			};
+
+			console.log('message é : ' + JSON.stringify(message, null, 4));
+
+			//callback style
+			fcm.send(message, function(err, response){
+			    if (err) {
+			        console.log("NÃO enviou o push!");
+			    } else {
+			        console.log("Push enviado com sucesso");
+			    }
+			});
+
+	    }
+
+
 	});
 }
 
