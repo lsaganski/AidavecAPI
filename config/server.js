@@ -186,13 +186,23 @@ app.put('/api/user', function(req, res) {
 	var conn = database();
  	var data = req.body;
 
-	conn.query('UPDATE AIDAVEC_USER SET USR_NOME = \'' + [data.USR_NOME] + '\', USR_SOBRENOME = \'' + [data.USR_SOBRENOME] + '\', USR_EMAIL = \'' + [data.USR_EMAIL] + '\', USR_TELEFONE = \'' + [data.USR_TELEFONE] + '\', USR_UF = \'' + [data.USR_UF] + '\', USR_CIDADE = \'' + [data.USR_CIDADE] + '\', USR_STATUS = '+ [data.USR_STATUS] + ', USR_SENHA = ' + ([data.USR_SENHA] == null ? 'USR_SENHA' : ('\'' + [data.USR_SENHA] + '\'') ) + ' WHERE USR_ID = ' + [data.USR_ID], function(err,result){
+ 	if (data.USR_SENHA != null && data.USR_SENHA.length > 0) {
+		conn.query('UPDATE AIDAVEC_USER SET USR_NOME = \'' + [data.USR_NOME] + '\', USR_SOBRENOME = \'' + [data.USR_SOBRENOME] + '\', USR_EMAIL = \'' + [data.USR_EMAIL] + '\', USR_TELEFONE = \'' + [data.USR_TELEFONE] + '\', USR_UF = \'' + [data.USR_UF] + '\', USR_CIDADE = \'' + [data.USR_CIDADE] + '\', USR_DEVICE = \'' + [data.USR_DEVICE] + '\', USR_STATUS = '+ [data.USR_STATUS] + ', USR_SENHA = \'' + [data.USR_SENHA] + '\' WHERE USR_ID = ' + [data.USR_ID], function(err,result){
 
-		if (data.USR_STATUS == 0)
-			SendMail(data.USR_EMAIL, [data.USR_ID]);
+			if (data.USR_STATUS == 0)
+				SendMail(data.USR_EMAIL, [data.USR_ID]);
 
-		return res.json(result);
-	});
+			return res.json(result);
+		});
+	} else {
+		conn.query('UPDATE AIDAVEC_USER SET USR_NOME = \'' + [data.USR_NOME] + '\', USR_SOBRENOME = \'' + [data.USR_SOBRENOME] + '\', USR_EMAIL = \'' + [data.USR_EMAIL] + '\', USR_TELEFONE = \'' + [data.USR_TELEFONE] + '\', USR_UF = \'' + [data.USR_UF] + '\', USR_CIDADE = \'' + [data.USR_CIDADE] + '\', USR_DEVICE = \'' + [data.USR_DEVICE] + '\', USR_STATUS = '+ [data.USR_STATUS] + ' WHERE USR_ID = ' + [data.USR_ID], function(err,result){
+
+			if (data.USR_STATUS == 0)
+				SendMail(data.USR_EMAIL, [data.USR_ID]);
+
+			return res.json(result);
+		});
+	}
 });
 
 // CRUD Update
@@ -205,6 +215,15 @@ app.put('/api/vehicle', function(req, res) {
 	});
 });
 
+// CRUD Update
+app.put('/api/note', function(req, res) {
+	var conn = database();
+ 	var data = req.body;
+
+	conn.query('UPDATE AIDAVEC_NOTIFICACAO SET USR_ID = ' + [data.USR_ID] + ', NOT_TITULO = \'' + [data.NOT_TITULO] + '\', NOT_MENSAGEM = \'' + [data.NOT_MENSAGEM] + '\', NOT_OPCAOA = \'' + [data.NOT_OPCAOA] + '\', NOT_OPCAOB = \'' + [data.NOT_OPCAOB] + '\', NOT_OPCAOC = \'' + [data.NOT_OPCAOC] + '\', NOT_OPCAOD = \'' + [data.NOT_OPCAOD] + '\', NOT_OPCAOE = \'' + [data.NOT_OPCAOE] + '\', NOT_TIPO = ' + [data.NOT_TIPO] + ', NOT_PUSH = ' + [data.NOT_PUSH] + ', NOT_RESPOSTA = \'' + [data.NOT_RESPOSTA] + '\' WHERE NOT_ID = ' + [data.NOT_ID], function(err,result){
+		return res.json(result);
+	});
+});
 
 function SaveWaypoint(data, conn) {
 	conn.query('INSERT INTO AIDAVEC_WAYPOINT SET ? ', [data], function(err,result){
