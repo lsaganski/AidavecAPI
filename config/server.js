@@ -127,6 +127,15 @@ app.get('/api/user/:userid', function(req, res) {
 	});
 });
 
+// CRUD Get Last Waypoint
+app.get('/api/waypoint/', function(req, res) {
+	var conn = database();
+
+	conn.query('SELECT * FROM AIDAVEC_WAYPOINT ORDER BY WAY_ID DESC LIMIT 1', function(err,result){
+		return res.json(result);
+	});
+});
+
 // CRUD Insert
 app.post('/api/user', function(req, res) {
 	var conn = database();
@@ -225,16 +234,6 @@ app.put('/api/note', function(req, res) {
 	});
 });
 
-function SaveWaypoint(data, conn) {
-	conn.query('INSERT INTO AIDAVEC_WAYPOINT SET ? ', [data], function(err,result){
-
-		if (err)
-			success = false;
-
-		return true;
-	});
-}
-
 // Ativar cadastro
 app.get('/api/active/user/:id', function(req, res) {
 	var conn = database();
@@ -255,6 +254,18 @@ app.delete('/api/:tablename/:id', function(req, res) {
 
 });
 //------------------------------------------------------
+//FUNCTIONS
+//------------------------------------------------------
+
+function SaveWaypoint(data, conn) {
+	conn.query('INSERT INTO AIDAVEC_WAYPOINT SET ? ', [data], function(err,result){
+
+		if (err)
+			success = false;
+
+		return true;
+	});
+}
 
 function SendMail(address, id) {
 	var nodemailer = require('nodemailer');
