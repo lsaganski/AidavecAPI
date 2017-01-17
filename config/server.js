@@ -22,6 +22,7 @@ var database = require('./dbConnection')();
 var query = require('../app/models/query');
 
 var sucess = true;
+var auxResult;
 
 // Login
 app.post('/api/login/', function(req, res) {
@@ -107,6 +108,46 @@ app.get('/api/notes/:userid', function(req, res) {
 	});
 });
 
+// CRUD Get Chart Semanal
+app.get('/api/chart_semanal/:userid', function(req, res) {
+	var conn = database();
+	var userid = req.params.userid;
+
+	conn.query('SELECT 80 as SEGUNDA, 30 as TERCA, 160 as QUARTA, 70 as QUINTA, 170 as SEXTA, 75 as SABADO, 180 as DOMINGO FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Get Report
+app.get('/api/report/:userid', function(req, res) {
+	var conn = database();
+	var userid = req.params.userid;
+
+	var totalPontos = 0;
+	var totalPontosCampanha = 0;
+	var kmDia = 0;
+	var kmSemana = 0;
+	var mkMes = 0;
+
+	conn.query('SELECT 32154 as TOTALPONTOS FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+		totalPontos = rows[0].TOTALPONTOS;
+		conn.query('SELECT 1234 as TOTALPONTOSCAMPANHA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+			totalPontosCampanha = rows[0].TOTALPONTOSCAMPANHA;
+			conn.query('SELECT 121 as KMDIA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+				kmDia = rows[0].KMDIA;
+				conn.query('SELECT 489 as KMSEMANA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+					kmSemana = rows[0].KMSEMANA;
+					conn.query('SELECT 1290 as KMMES FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+						kmMes = rows[0].KMMES;
+						return res.json([{ total_pontos: totalPontos, total_pontos_campanha: totalPontosCampanha, km_dia: kmDia, km_semana: kmSemana, km_mes: kmMes }]);		
+					});		
+				});		
+			});		
+		});		
+	});
+
+});
+
 // CRUD Get Vehicle
 app.get('/api/vehicle/:userid', function(req, res) {
 	var conn = database();
@@ -187,7 +228,7 @@ app.post('/api/waypoints', function(req, res) {
  			break;
 	};
 
-	return res.sendStatus(success ? 200 : 501);
+	return res.json(auxResult);
 });
 
 // CRUD Update
@@ -262,6 +303,8 @@ function SaveWaypoint(data, conn) {
 
 		if (err)
 			success = false;
+
+		auxResult = result;
 
 		return true;
 	});
