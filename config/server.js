@@ -129,15 +129,17 @@ app.get('/api/report/:userid', function(req, res) {
 	var kmSemana = 0;
 	var mkMes = 0;
 
-	conn.query('SELECT 32154 as TOTALPONTOS FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+	var curDate = getStrDateTime(new Date());
+
+	conn.query('SELECT CAU_PONTUACAO as TOTALPONTOS FROM AIDAVEC_CAMPANHA_USUARIO WHERE USR_ID = ' + userid + ' AND CAM_ID = 1', function(err, rows, fields) {
 		totalPontos = rows[0].TOTALPONTOS;
-		conn.query('SELECT 1234 as TOTALPONTOSCAMPANHA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+		conn.query('SELECT IFNULL(SUM(CAU_PONTUACAO), 0) as TOTALPONTOSCAMPANHA FROM AIDAVEC_CAMPANHA_USUARIO WHERE USR_ID = ' + userid + ' AND CAM_ID > 1', function(err, rows, fields) {
 			totalPontosCampanha = rows[0].TOTALPONTOSCAMPANHA;
-			conn.query('SELECT 121 as KMDIA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMDIA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' AND WAY_DATE >= \'' + getDayBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
 				kmDia = rows[0].KMDIA;
-				conn.query('SELECT 489 as KMSEMANA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMSEMANA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' AND WAY_DATE >= \'' + getWeekBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
 					kmSemana = rows[0].KMSEMANA;
-					conn.query('SELECT 1290 as KMMES FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err, rows, fields) {
+					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMMES FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' AND WAY_DATE >= \'' + getMonthBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
 						kmMes = rows[0].KMMES;
 						return res.json([{ total_pontos: totalPontos, total_pontos_campanha: totalPontosCampanha, km_dia: kmDia, km_semana: kmSemana, km_mes: kmMes }]);		
 					});		
@@ -181,10 +183,13 @@ app.get('/api/waypoint/', function(req, res) {
 app.post('/api/user', function(req, res) {
 	var conn = database();
  	var data = req.body;
+ 	data.USR_DT_CADASTRO = getStrDateTime(new Date());
 
 	conn.query('INSERT INTO AIDAVEC_USER SET ? ', [data], function(err,result){
 
+		InsertDefaultCampaign(result.insertId);
 		SendMail(data.USR_EMAIL, result.insertId);
+
 		return res.json(result);
 	});
 });
@@ -306,6 +311,26 @@ function SaveWaypoint(data, conn) {
 
 		auxResult = result;
 
+		var curDate; 
+
+		var query = 'SELECT * FROM AIDAVEC_CAMPANHA WHERE CAM_INICIO <= \'' + data.way_date + '\' AND CAM_FIM >= \'' + data.way_date + '\'';
+		console.log(query);
+		conn.query(query, function(err, rows, fields) {
+		    if (err) throw err;
+
+		    for (var i in rows) {
+		    	query = 'UPDATE AIDAVEC_CAMPANHA_USUARIO SET CAU_DISTANCIA = CAU_DISTANCIA + ' + data.way_percorrido + ', CAU_PONTUACAO = CAU_PONTUACAO + ' + data.way_percorrido + ' WHERE USR_ID = ' + data.usr_id + ' AND CAM_ID = ' + rows[i].CAM_ID;
+		    	console.log(query);
+    			conn.query(query, function(err,result){
+
+					if (err) {
+						success = false;
+						console.log('erro no update pontuacao');
+					}
+				});
+		    }
+		});
+
 		return true;
 	});
 }
@@ -393,5 +418,59 @@ function SendPush(data) {
 	});
 }
 
-module.exports = app;
+function InsertDefaultCampaign(id) {
 
+	var conn = database();
+	conn.query('INSERT INTO AIDAVEC_CAMPANHA_USUARIO (CAM_ID, USR_ID, CAU_PONTUACAO, CAU_DISTANCIA) VALUES (1, ' + id + ', 0, 0)', function(err,result){
+
+		if (err)
+			return false;
+
+	});
+}
+
+function getDayBegin() {
+	var d = new Date();
+	d.setHours(0, 0, 0);
+	return getStrDateTime(d);
+}
+
+function getWeekBegin() {
+	var d = new Date();
+	d.setHours(0, 0, 0);
+	var dayOfWeek = d.getDay();
+	var diff = d.getDate() - dayOfWeek;
+	return getStrDateTime(new Date(d.setDate(diff)));
+}
+
+function getMonthBegin() {
+	var d = new Date();
+	d.setHours(0, 0, 0);
+	d.setDate(1);
+	return getStrDateTime(d);
+}
+
+function getStrDateTime(d) {
+
+    var hour = d.getHours();
+    hour = (hour < 10 ? "0" : "") + hour;
+
+    var min  = d.getMinutes();
+    min = (min < 10 ? "0" : "") + min;
+
+    var sec  = d.getSeconds();
+    sec = (sec < 10 ? "0" : "") + sec;
+
+    var year = d.getFullYear();
+
+    var month = d.getMonth() + 1;
+    month = (month < 10 ? "0" : "") + month;
+
+    var day  = d.getDate();
+    day = (day < 10 ? "0" : "") + day;
+
+    return year + "-" + month + "-" + day + " " + hour + ":" + min + ":" + sec;
+
+}
+
+module.exports = app;
