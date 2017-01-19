@@ -109,12 +109,87 @@ app.get('/api/notes/:userid', function(req, res) {
 });
 
 // CRUD Get Chart Semanal
-app.get('/api/chart_semanal/:userid', function(req, res) {
+app.post('/api/chart_semanal', function(req, res) {
 	var conn = database();
-	var userid = req.params.userid;
+	var data = req.body;
 
-	conn.query('SELECT 80 as SEGUNDA, 30 as TERCA, 160 as QUARTA, 70 as QUINTA, 170 as SEXTA, 75 as SABADO, 180 as DOMINGO FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' LIMIT 1', function(err,result){
-		return res.json(result);
+	var seg = 0, ter = 0, qua = 0, qui = 0, sex = 0, sab = 0, dom= 0;
+
+	var today = new Date(data.DT_TODAY);
+	var dayOfWeek = today.getDay();
+	var diff = today.getDate() - dayOfWeek;
+
+	// DOMINGO
+	var inicio = new Date(today.setDate(diff));
+	inicio.setHours(0, 0, 0);
+	var fim = new Date(inicio);
+	fim.setHours(23, 59, 59);
+
+	var query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'';
+
+	conn.query(query, function(err, rows, fields){
+		dom = rows[0].TOTAL;
+
+		// SEGUNDA
+		inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+		inicio.setHours(0, 0, 0);
+		fim = new Date(inicio);
+		fim.setHours(23, 59, 59);
+
+		conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+			seg = rows[0].TOTAL;
+
+			// TERCA
+			inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+			inicio.setHours(0, 0, 0);
+			fim = new Date(inicio);
+			fim.setHours(23, 59, 59);
+			
+			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+				ter = rows[0].TOTAL;
+
+				// QUARTA
+				inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+				inicio.setHours(0, 0, 0);
+				fim = new Date(inicio);
+				fim.setHours(23, 59, 59);
+				
+				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+					qua = rows[0].TOTAL;
+
+					// QUINTA
+					inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+					inicio.setHours(0, 0, 0);
+					fim = new Date(inicio);
+					fim.setHours(23, 59, 59);
+
+					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+						qui = rows[0].TOTAL;
+
+						// SEXTA
+						inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+						inicio.setHours(0, 0, 0);
+						fim = new Date(inicio);
+						fim.setHours(23, 59, 59);
+						
+						conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+							sex = rows[0].TOTAL;
+
+							// SABADO
+							inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+							inicio.setHours(0, 0, 0);
+							fim = new Date(inicio);
+							fim.setHours(23, 59, 59);
+
+							conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+								sab = rows[0].TOTAL;
+								return res.json([{ dom: dom, ter: ter, qua: qua, qui: qui, sex: sex, sab: sab }]);		
+							});
+						});
+					});
+				});
+			});
+		});
 	});
 });
 
@@ -147,6 +222,19 @@ app.get('/api/report/:userid', function(req, res) {
 			});		
 		});		
 	});
+
+});
+
+// CRUD Get Report
+app.get('/api/kmporperiodo', function(req, res) {
+	var conn = database();
+	var data = req.body;
+
+	var km = 0;
+
+	conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KM FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + data.DT_INICIO + '\' AND WAY_DATE <= \'' + data.DT_FIM + '\'', function(err, rows, fields) {
+		km = rows[0].KM;
+	});		
 
 });
 
@@ -202,6 +290,35 @@ app.post('/api/vehicle', function(req, res) {
 	conn.query('INSERT INTO AIDAVEC_VEICULO SET ? ', [data], function(err,result){
 		return res.json(result);
 	});
+});
+
+// CRUD Insert
+app.post('/api/campaign', function(req, res) {
+	var conn = database();
+	var data = req.body;
+
+	conn.query('INSERT INTO AIDAVEC_CAMPANHA SET ? ', [data], function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Insert
+app.post('/api/campaign', function(req, res) {
+	var conn = database();
+ 	var data = req.body; 
+ 	var result = 'T';
+ 	success = true;
+
+ 	for (var index in data.waypoints) {
+ 		var waypoint = data.waypoints[index];
+
+ 		SaveWaypoint(waypoint, conn);
+
+ 		if (success == false)
+ 			break;
+	};
+
+	return res.json(auxResult);
 });
 
 // CRUD Insert
@@ -313,7 +430,7 @@ function SaveWaypoint(data, conn) {
 
 		var curDate; 
 
-		var query = 'SELECT * FROM AIDAVEC_CAMPANHA WHERE CAM_INICIO <= \'' + data.way_date + '\' AND CAM_FIM >= \'' + data.way_date + '\'';
+		var query = 'SELECT * FROM AIDAVEC_CAMPANHA WHERE CAM_INICIO <= \'' + data.way_date + '\' AND CAM_FIM >= \'' + data.way_date + '\' AND CAM_STATUS = 1';
 		console.log(query);
 		conn.query(query, function(err, rows, fields) {
 		    if (err) throw err;
