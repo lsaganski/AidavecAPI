@@ -99,17 +99,17 @@ app.get('/api/:tablename', function(req, res) {
 });
 
 // CRUD Get Notes
-app.get('/api/notes/:userid', function(req, res) {
+app.post('/api/getnotes/', function(req, res) {
 	var conn = database();
-	var userid = req.params.userid;
+	var data = req.body;
 
-	conn.query('SELECT * FROM AIDAVEC_NOTIFICACAO WHERE USR_ID = ' + userid, function(err,result){
+	conn.query('SELECT * FROM AIDAVEC_NOTIFICACAO WHERE USR_ID = ' + data.USR_ID, function(err,result){
 		return res.json(result);
 	});
 });
 
 // CRUD Get Chart Semanal
-app.post('/api/chart_semanal', function(req, res) {
+app.post('/api/getchartsemanal', function(req, res) {
 	var conn = database();
 	var data = req.body;
 
@@ -193,10 +193,97 @@ app.post('/api/chart_semanal', function(req, res) {
 	});
 });
 
-// CRUD Get Report
-app.get('/api/report/:userid', function(req, res) {
+// CRUD Get Chart Semanal
+app.post('/api/getcharthome', function(req, res) {
 	var conn = database();
-	var userid = req.params.userid;
+	var data = req.body;
+
+	var jan = 150, fev = 250, mar = 550, abr = 755, mai = 550, jun = 450, jul = 430, ago = 670, set = 570, out = 230, nov = 140, dez = 450;
+
+	var today = new Date(data.DT_TODAY);
+//	var month = today.getMonth();
+//	var diff = today.getDate() - dayOfWeek;
+
+/*	// DOMINGO
+	var inicio = new Date(today.setDate(diff));
+	inicio.setHours(0, 0, 0);
+	var fim = new Date(inicio);
+	fim.setHours(23, 59, 59);
+
+	var query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'';
+
+	conn.query(query, function(err, rows, fields){
+		dom = rows[0].TOTAL;
+
+		// SEGUNDA
+		inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+		inicio.setHours(0, 0, 0);
+		fim = new Date(inicio);
+		fim.setHours(23, 59, 59);
+
+		conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+			seg = rows[0].TOTAL;
+
+			// TERCA
+			inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+			inicio.setHours(0, 0, 0);
+			fim = new Date(inicio);
+			fim.setHours(23, 59, 59);
+			
+			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+				ter = rows[0].TOTAL;
+
+				// QUARTA
+				inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+				inicio.setHours(0, 0, 0);
+				fim = new Date(inicio);
+				fim.setHours(23, 59, 59);
+				
+				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+					qua = rows[0].TOTAL;
+
+					// QUINTA
+					inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+					inicio.setHours(0, 0, 0);
+					fim = new Date(inicio);
+					fim.setHours(23, 59, 59);
+
+					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+						qui = rows[0].TOTAL;
+
+						// SEXTA
+						inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+						inicio.setHours(0, 0, 0);
+						fim = new Date(inicio);
+						fim.setHours(23, 59, 59);
+						
+						conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+							sex = rows[0].TOTAL;
+
+							// SABADO
+							inicio = new Date(inicio.setDate(inicio.getDate() + 1));
+							inicio.setHours(0, 0, 0);
+							fim = new Date(inicio);
+							fim.setHours(23, 59, 59);
+
+							conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
+								sab = rows[0].TOTAL;
+								return res.json([{ dom: dom, ter: ter, qua: qua, qui: qui, sex: sex, sab: sab }]);		
+							});
+						});
+					});
+				});
+			});
+		});
+	});*/
+
+	return res.json([{ jan: jan, fev: fev, mar: mar, abr: abr, mai: mai, jun: jun, jul: jul, ago: ago, set: set, out: out, nov: nov, dez: dez }]);
+});
+
+// CRUD Get Report
+app.post('/api/report/', function(req, res) {
+	var conn = database();
+	var data = req.body;
 
 	var totalPontos = 0;
 	var totalPontosCampanha = 0;
@@ -206,15 +293,15 @@ app.get('/api/report/:userid', function(req, res) {
 
 	var curDate = getStrDateTime(new Date());
 
-	conn.query('SELECT CAU_PONTUACAO as TOTALPONTOS FROM AIDAVEC_CAMPANHA_USUARIO WHERE USR_ID = ' + userid + ' AND CAM_ID = 1', function(err, rows, fields) {
+	conn.query('SELECT CAU_PONTUACAO as TOTALPONTOS FROM AIDAVEC_CAMPANHA_USUARIO WHERE USR_ID = ' + data.USR_ID + ' AND CAM_ID = 1', function(err, rows, fields) {
 		totalPontos = rows[0].TOTALPONTOS;
-		conn.query('SELECT IFNULL(SUM(CAU_PONTUACAO), 0) as TOTALPONTOSCAMPANHA FROM AIDAVEC_CAMPANHA_USUARIO WHERE USR_ID = ' + userid + ' AND CAM_ID > 1', function(err, rows, fields) {
+		conn.query('SELECT IFNULL(SUM(CAU_PONTUACAO), 0) as TOTALPONTOSCAMPANHA FROM AIDAVEC_CAMPANHA_USUARIO WHERE USR_ID = ' + data.USR_ID + ' AND CAM_ID > 1', function(err, rows, fields) {
 			totalPontosCampanha = rows[0].TOTALPONTOSCAMPANHA;
-			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMDIA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' AND WAY_DATE >= \'' + getDayBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
+			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMDIA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getDayBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
 				kmDia = rows[0].KMDIA;
-				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMSEMANA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' AND WAY_DATE >= \'' + getWeekBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
+				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMSEMANA FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getWeekBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
 					kmSemana = rows[0].KMSEMANA;
-					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMMES FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + userid + ' AND WAY_DATE >= \'' + getMonthBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
+					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as KMMES FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getMonthBegin() + '\' AND WAY_DATE <= \'' + curDate + '\'', function(err, rows, fields) {
 						kmMes = rows[0].KMMES;
 						return res.json([{ total_pontos: totalPontos, total_pontos_campanha: totalPontosCampanha, km_dia: kmDia, km_semana: kmSemana, km_mes: kmMes }]);		
 					});		
@@ -239,30 +326,31 @@ app.get('/api/kmporperiodo', function(req, res) {
 });
 
 // CRUD Get Vehicle
-app.get('/api/vehicle/:userid', function(req, res) {
+app.post('/api/getvehicle/', function(req, res) {
 	var conn = database();
-	var userid = req.params.userid;
+	var data = req.body;
 
-	conn.query('SELECT * FROM AIDAVEC_VEICULO WHERE USR_ID = ' + userid, function(err,result){
+	conn.query('SELECT * FROM AIDAVEC_VEICULO WHERE USR_ID = ' + data.USR_ID, function(err,result){
 		return res.json(result);
 	});
 });
 
 // CRUD Get User
-app.get('/api/user/:userid', function(req, res) {
+app.post('/api/getuser/', function(req, res) {
 	var conn = database();
-	var userid = req.params.userid;
+	var data = req.body;
 
-	conn.query('SELECT * FROM AIDAVEC_USER WHERE USR_ID = ' + userid, function(err,result){
+	conn.query('SELECT * FROM AIDAVEC_USER WHERE USR_ID = ' + data.body, function(err,result){
 		return res.json(result);
 	});
 });
 
 // CRUD Get Last Waypoint
-app.get('/api/waypoint/', function(req, res) {
+app.post('/api/getwaypoint/', function(req, res) {
 	var conn = database();
+	var data = req.body;
 
-	conn.query('SELECT * FROM AIDAVEC_WAYPOINT ORDER BY WAY_ID DESC LIMIT 1', function(err,result){
+	conn.query('SELECT * FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' ORDER BY WAY_ID DESC LIMIT 1', function(err,result){
 		return res.json(result);
 	});
 });
@@ -378,6 +466,19 @@ app.put('/api/user', function(req, res) {
 });
 
 // CRUD Update
+app.put('/api/password', function(req, res) {
+	var conn = database();
+ 	var data = req.body;
+
+ 	if (data.USR_SENHA != null && data.USR_SENHA.length > 0) {
+		conn.query('UPDATE AIDAVEC_USER SET USR_SENHA = \'' + [data.USR_SENHA] + '\' WHERE USR_ID = ' + [data.USR_ID], function(err,result){
+
+			return res.json(result);
+		});
+	} 
+});
+
+// CRUD Update
 app.put('/api/vehicle', function(req, res) {
 	var conn = database();
  	var data = req.body;
@@ -398,14 +499,47 @@ app.put('/api/note', function(req, res) {
 });
 
 // Ativar cadastro
-app.get('/api/active/user/:id', function(req, res) {
+app.get('/api/active/user/:code', function(req, res) {
 	var conn = database();
+	var code = req.params.id;
+	//code = Buffer.from(code, 'base64').toString('ascii');
 
-	var id = req.params.id;
+	var query = 'SELECT * FROM AIDAVEC_TOKEN WHERE TOK_HASH = \'' + code + '\' AND TOK_STATUS = 1' ;
+	conn.query(query, function(err, rows, fields) {
+		if (err)
+			return res.end("<html><body>Código inválido.</body></html>");	
 
-	conn.query('UPDATE AIDAVEC_USER SET USR_STATUS = 1 WHERE USR_ID = ' + id, function(err,result){
-		return res.end("<html><body>Cadastro ativado com sucesso.</body></html>");
+	    if (rows.length > 0) {
+	    	usrid = rows[0].USR_ID;
+	    	query = 'UPDATE AIDAVEC_TOKEN SET TOK_STATUS = 0 WHERE TOK_ID = ' + rows[0].TOK_ID;
+			conn.query(query, function(err,result){
+
+				if (err)
+					return res.end("<html><body>Código inválido.</body></html>");	
+
+		    	query = 'UPDATE AIDAVEC_USER SET USR_STATUS = 1 WHERE USR_ID = ' + usrid;
+				conn.query(query, function(err,result){
+					if (err)
+						return res.end("<html><body>Código inválido.</body></html>");	
+					else
+						return res.end("<html><body>Cadastro ativado com sucesso.</body></html>");
+				});
+			});
+	    } else {
+			if (err)
+				return res.end("<html><body>Código inválido.</body></html>");	
+
+	    }
 	});
+
+	
+	/*// uso o campo USR_DEVICE emprestado para verificar o id hasheado. Neste momento o campo ainda nao é usado para armazenar o device token.	  
+	conn.query('UPDATE AIDAVEC_USER SET USR_STATUS = 1, USR_DEVICE = NULL WHERE USR_DEVICE = ' + code, function(err,result){
+		if (err)
+			return res.end("<html><body>Código inválido.</body></html>");	
+		else
+			return res.end("<html><body>Cadastro ativado com sucesso.</body></html>");
+	});*/
 });
 
 
@@ -453,29 +587,37 @@ function SaveWaypoint(data, conn) {
 }
 
 function SendMail(address, id) {
-	var nodemailer = require('nodemailer');
+	var hashed = Buffer.from(id).toString('base64');
 
-   	var transporter = nodemailer.createTransport({
-	    host: 'smtp.mobila.com.br',
-	    port: 587,
-	    secure: false, // use SSL
-	    auth: {
-	        user: 'contato@mobila.com.br',
-	        pass: '1978@Mobila'
-	    }
+	conn.query('INSERT INTO AIDAVEC_TOKEN VALUES (\'' + hashed + '\', ' + id + ', NULL, 1, NULL)', function(err,result){
+
+		var nodemailer = require('nodemailer');
+
+	   	var transporter = nodemailer.createTransport({
+		    host: 'smtp.mobila.com.br',
+		    port: 587,
+		    secure: false, // use SSL
+		    auth: {
+		        user: 'contato@mobila.com.br',
+		        pass: '1978@Mobila'
+		    }
+		});
+
+		var email = {
+	  		from: 'contato@mobila.com.br', // Quem enviou este e-mail
+	  		to: address, // Quem receberá
+	  		subject: 'Confirme seu cadastro',  // Um assunto bacana :-) 
+	  		html: 'Bem vindo !<br><br>Você fez um novo cadastro no Aidavec.<br><br>Para começar a usar o aplicativo é necessário ativar seu cadastro, clicando no link abaixo :<br><br><a href="http://www.mobila.kinghost.net/aidavecapi/api/active/user/' + hashed + '">Ativar cadastro</a>' // O conteúdo do e-mail
+		};
+
+		transporter.sendMail(email, function(err, info){
+	  		if(err)
+	    		throw err; // Oops, algo de errado aconteceu.
+		});
 	});
 
-	var email = {
-  		from: 'contato@mobila.com.br', // Quem enviou este e-mail
-  		to: address, // Quem receberá
-  		subject: 'Confirme seu cadastro',  // Um assunto bacana :-) 
-  		html: 'Bem vindo !<br><br>Você fez um novo cadastro no Aidavec.<br><br>Para começar a usar o aplicativo é necessário ativar seu cadastro, clicando no link abaixo :<br><br><a href="http://www.mobila.kinghost.net/aidavecapi/api/active/user/' + id + '">Ativar cadastro</a>' // O conteúdo do e-mail
-	};
 
-	transporter.sendMail(email, function(err, info){
-  		if(err)
-    		throw err; // Oops, algo de errado aconteceu.
-	});
+
 }
 
 function SendPush(data) {
