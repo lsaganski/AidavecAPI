@@ -364,7 +364,7 @@ app.post('/api/user', function(req, res) {
 	conn.query('INSERT INTO AIDAVEC_USER SET ? ', [data], function(err,result){
 
 		InsertDefaultCampaign(result.insertId);
-		SendMail(data.USR_EMAIL, result.insertId);
+		SendMail(data.USR_EMAIL, result.insertId.toString());
 
 		return res.json(result);
 	});
@@ -501,21 +501,24 @@ app.put('/api/note', function(req, res) {
 // Ativar cadastro
 app.get('/api/active/user/:code', function(req, res) {
 	var conn = database();
-	var code = req.params.id;
+	var code = req.params.code;
 	//code = Buffer.from(code, 'base64').toString('ascii');
 
 	var query = 'SELECT * FROM AIDAVEC_TOKEN WHERE TOK_HASH = \'' + code + '\' AND TOK_STATUS = 1' ;
 	conn.query(query, function(err, rows, fields) {
-		if (err)
+		if (err) {
 			return res.end("<html><body>Código inválido.</body></html>");	
+		}
 
 	    if (rows.length > 0) {
 	    	usrid = rows[0].USR_ID;
 	    	query = 'UPDATE AIDAVEC_TOKEN SET TOK_STATUS = 0 WHERE TOK_ID = ' + rows[0].TOK_ID;
+
 			conn.query(query, function(err,result){
 
-				if (err)
+				if (err) {
 					return res.end("<html><body>Código inválido.</body></html>");	
+				}
 
 		    	query = 'UPDATE AIDAVEC_USER SET USR_STATUS = 1 WHERE USR_ID = ' + usrid;
 				conn.query(query, function(err,result){
@@ -526,8 +529,7 @@ app.get('/api/active/user/:code', function(req, res) {
 				});
 			});
 	    } else {
-			if (err)
-				return res.end("<html><body>Código inválido.</body></html>");	
+			return res.end("<html><body>Código inválido.</body></html>");	
 
 	    }
 	});
@@ -587,9 +589,18 @@ function SaveWaypoint(data, conn) {
 }
 
 function SendMail(address, id) {
-	var hashed = Buffer.from(id).toString('base64');
+	var conn = database();
+	var hashed = '';
+	//if (typeof Buffer.from === "function") {
+    	// Node 5.10+
+    //	hashed = Buffer.from(id).toString('base64');
+	//} else {
+	    // older Node versions
+	    hashed = new Buffer(id).toString('base64');
+	//}
+	//var hashed = Buffer.from(id).toString('base64');
 
-	conn.query('INSERT INTO AIDAVEC_TOKEN VALUES (\'' + hashed + '\', ' + id + ', NULL, 1, NULL)', function(err,result){
+	conn.query('INSERT INTO AIDAVEC_TOKEN (TOK_HASH, USR_ID, TOK_STATUS) VALUES (\'' + hashed + '\', ' + id + ', 1)', function(err,result){
 
 		var nodemailer = require('nodemailer');
 
