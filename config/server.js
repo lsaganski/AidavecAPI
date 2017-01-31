@@ -498,7 +498,7 @@ app.put('/api/forgot', function(req, res) {
 	var pass = aux;
 	crypto.createHash('md5').update(pass).digest("hex");
 
-	conn.query('UPDATE AIDAVEC_USER SET USR_SENHA = \'' + [pass] + '\' WHERE USR_EMAIL = ' + [data.USR_EMAIL], function(err,result){
+	conn.query('UPDATE AIDAVEC_USER SET USR_SENHA = \'' + [pass] + '\' WHERE USR_EMAIL = \'' + [data.USR_EMAIL] + '\'', function(err,result){
 		sendPassEmail(data.USR_EMAIL, aux);
 
 		return res.json(result);
