@@ -7,6 +7,7 @@ var app = express();
 var path = require('path');
 var formidable = require('formidable');
 var fs = require('fs');
+var crypto = require('crypto');
 
 app.use(bodyparser.urlencoded({
 	extended: true
@@ -381,6 +382,17 @@ app.post('/api/vehicle', function(req, res) {
 });
 
 // CRUD Insert
+app.post('/api/log', function(req, res) {
+	var conn = database();
+	var data = req.body;
+	data.LOG_DATA = getStrDateTime(new Date());
+
+	conn.query('INSERT INTO AIDAVEC_LOG SET ? ', [data], function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Insert
 app.post('/api/campaign', function(req, res) {
 	var conn = database();
 	var data = req.body;
@@ -472,10 +484,25 @@ app.put('/api/password', function(req, res) {
 
  	if (data.USR_SENHA != null && data.USR_SENHA.length > 0) {
 		conn.query('UPDATE AIDAVEC_USER SET USR_SENHA = \'' + [data.USR_SENHA] + '\' WHERE USR_ID = ' + [data.USR_ID], function(err,result){
-
 			return res.json(result);
 		});
 	} 
+});
+
+// CRUD Update
+app.put('/api/forgot', function(req, res) {
+	var conn = database();
+ 	var data = req.body;
+
+	var aux = '' +  Math.random() * (99999 - 10000) + 10000;
+	var pass = aux;
+	crypto.createHash('md5').update(pass).digest("hex");
+
+	conn.query('UPDATE AIDAVEC_USER SET USR_SENHA = \'' + [pass] + '\' WHERE USR_EMAIL = ' + [data.USR_EMAIL], function(err,result){
+		sendPassEmail(data.USR_EMAIL, aux);
+
+		return res.json(result);
+	});
 });
 
 // CRUD Update
@@ -626,9 +653,34 @@ function SendMail(address, id) {
 	    		throw err; // Oops, algo de errado aconteceu.
 		});
 	});
+}
 
+function SendPassMail(address, pass) {
+	var conn = database();
 
+	var nodemailer = require('nodemailer');
 
+   	var transporter = nodemailer.createTransport({
+	    host: 'smtp.mobila.com.br',
+	    port: 587,
+	    secure: false, // use SSL
+	    auth: {
+	        user: 'contato@mobila.com.br',
+	        pass: '1978@Mobila'
+	    }
+	});
+
+	var email = {
+  		from: 'contato@mobila.com.br', // Quem enviou este e-mail
+  		to: address, // Quem receberá
+  		subject: 'Senha provisória',  // Um assunto bacana :-) 
+  		html: 'Olá !<br><br>Conforme solicitado, geramos uma nova senha provisória para que você possa acessar o Aidavec. <br><br>Altere sua senha provisória o quanto antes. <br><br>Caso você não tenha solicitado isso, contacte o administrador. <br><br>Sua senha provisória é : ' + aux 
+	};
+
+	transporter.sendMail(email, function(err, info){
+  		if(err)
+    		throw err; // Oops, algo de errado aconteceu.
+	});
 }
 
 function SendPush(data) {
