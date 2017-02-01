@@ -199,77 +199,113 @@ app.post('/api/getcharthome', function(req, res) {
 	var conn = database();
 	var data = req.body;
 
-	var jan = 150, fev = 250, mar = 550, abr = 755, mai = 550, jun = 450, jul = 430, ago = 670, set = 570, out = 230, nov = 140, dez = 450;
+	var ca = 0, cb = 0, cc = 0, cd = 0, ce = 0, cf = 0, cg = 0, ch = 0;
 
-	var today = new Date(data.DT_TODAY);
-//	var month = today.getMonth();
-//	var diff = today.getDate() - dayOfWeek;
+	var today = new Date();
+	var month = today.getMonth();
+	var dtini = getDtIniByMonth(month);
+	var dtfim = getDtFimByMonth(month);
 
-/*	// DOMINGO
-	var inicio = new Date(today.setDate(diff));
-	inicio.setHours(0, 0, 0);
-	var fim = new Date(inicio);
-	fim.setHours(23, 59, 59);
 
-	var query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'';
+	// Mes atual
+	var query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
 
 	conn.query(query, function(err, rows, fields){
-		dom = rows[0].TOTAL;
+		ch = rows[0].TOTAL;
 
-		// SEGUNDA
-		inicio = new Date(inicio.setDate(inicio.getDate() + 1));
-		inicio.setHours(0, 0, 0);
-		fim = new Date(inicio);
-		fim.setHours(23, 59, 59);
+		// Um mes atras
+		if ((month-1) < 0)
+			month = 11;
+		else
+			month--;
 
-		conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-			seg = rows[0].TOTAL;
+		var dtini = getDtIniByMonth(month);
+		var dtfim = getDtFimByMonth(month);
 
-			// TERCA
-			inicio = new Date(inicio.setDate(inicio.getDate() + 1));
-			inicio.setHours(0, 0, 0);
-			fim = new Date(inicio);
-			fim.setHours(23, 59, 59);
+		query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+		conn.query(query, function(err, rows, fields){
+			cg = rows[0].TOTAL;
+
+			// Dois meses atras
+			if ((month-1) < 0)
+				month = 11;
+			else
+				month--;
+
+			var dtini = getDtIniByMonth(month);
+			var dtfim = getDtFimByMonth(month);
 			
-			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-				ter = rows[0].TOTAL;
+			query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+			conn.query(query, function(err, rows, fields){
+				cf = rows[0].TOTAL;
 
-				// QUARTA
-				inicio = new Date(inicio.setDate(inicio.getDate() + 1));
-				inicio.setHours(0, 0, 0);
-				fim = new Date(inicio);
-				fim.setHours(23, 59, 59);
+				// Tres meses atras
+				if ((month-1) < 0)
+					month = 11;
+				else
+					month--;
+
+				var dtini = getDtIniByMonth(month);
+				var dtfim = getDtFimByMonth(month);
 				
-				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-					qua = rows[0].TOTAL;
+				query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+				conn.query(query, function(err, rows, fields){
+					ce = rows[0].TOTAL;
 
-					// QUINTA
-					inicio = new Date(inicio.setDate(inicio.getDate() + 1));
-					inicio.setHours(0, 0, 0);
-					fim = new Date(inicio);
-					fim.setHours(23, 59, 59);
+					// Quatro meses atras
+					if ((month-1) < 0)
+						month = 11;
+					else
+						month--;
 
-					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-						qui = rows[0].TOTAL;
+					var dtini = getDtIniByMonth(month);
+					var dtfim = getDtFimByMonth(month);
+					
+					query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+					conn.query(query, function(err, rows, fields){
+						cd = rows[0].TOTAL;
 
-						// SEXTA
-						inicio = new Date(inicio.setDate(inicio.getDate() + 1));
-						inicio.setHours(0, 0, 0);
-						fim = new Date(inicio);
-						fim.setHours(23, 59, 59);
-						
-						conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-							sex = rows[0].TOTAL;
+					// Cinco meses atras
+					if ((month-1) < 0)
+						month = 11;
+					else
+						month--;
 
-							// SABADO
-							inicio = new Date(inicio.setDate(inicio.getDate() + 1));
-							inicio.setHours(0, 0, 0);
-							fim = new Date(inicio);
-							fim.setHours(23, 59, 59);
+					var dtini = getDtIniByMonth(month);
+					var dtfim = getDtFimByMonth(month);
+					
+					query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+					conn.query(query, function(err, rows, fields){
+							cc = rows[0].TOTAL;
 
-							conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-								sab = rows[0].TOTAL;
-								return res.json([{ dom: dom, ter: ter, qua: qua, qui: qui, sex: sex, sab: sab }]);		
+							// Seis meses atras
+							if ((month-1) < 0)
+								month = 11;
+							else
+								month--;
+
+							var dtini = getDtIniByMonth(month);
+							var dtfim = getDtFimByMonth(month);
+							
+							query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+							conn.query(query, function(err, rows, fields){
+								cb = rows[0].TOTAL;
+								
+								// Seis meses atras
+								if ((month-1) < 0)
+									month = 11;
+								else
+									month--;
+
+								var dtini = getDtIniByMonth(month);
+								var dtfim = getDtFimByMonth(month);
+								
+								query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + dtini + '\' AND WAY_DATE <= \'' + dtfim + '\'';
+								conn.query(query, function(err, rows, fields){
+									ca = rows[0].TOTAL;
+									
+									return res.json([{ ca: ca, cb: cb, cc: cc, cd: cd, ce: ce, cf: cf, cg: cg, ch: ch }]);		
+								});
 							});
 						});
 					});
@@ -278,7 +314,7 @@ app.post('/api/getcharthome', function(req, res) {
 		});
 	});*/
 
-	return res.json([{ jan: jan, fev: fev, mar: mar, abr: abr, mai: mai, jun: jun, jul: jul, ago: ago, set: set, out: out, nov: nov, dez: dez }]);
+	return res.json([{ ca: ca, cb: cb, cc: cc, cd: cd, ce: ce, cf: cf, cg: cg, ch: ch }]);		
 });
 
 // CRUD Get Report
@@ -770,6 +806,36 @@ function getMonthBegin() {
 	d.setHours(0, 0, 0);
 	d.setDate(1);
 	return getStrDateTime(d);
+}
+
+function getDtIniByMonth(m) {
+	var d = new Date();
+
+	// Se mes solicitado for maior que o atual, é pq o mes desejado é do ano anterior
+	if (m > d.getMonth())
+		d.setYear(d.getYear()-1);
+
+	d.setMonth(m);
+	d.setHours(0, 0, 0);
+	d.setDate(1);
+	return getStrDateTime(d);
+}
+
+function getDtFimByMonth(m) {
+	var d = new Date();
+	
+	// Se mes solicitado for maior que o atual, é pq o mes desejado é do ano anterior
+	if ((m+1) > d.getMonth())
+		d.setYear(d.getYear()-1);
+
+	if ((m+1) > 11)
+		d.setMonth(0);
+	else
+		d.setMonth(m+1);
+
+	d.setHours(23, 59, 59);
+	d.setDate(1);
+	return getStrDateTime(new Date(d-1));
 }
 
 function getStrDateTime(d) {
