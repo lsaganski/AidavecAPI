@@ -494,12 +494,12 @@ app.put('/api/forgot', function(req, res) {
 	var conn = database();
  	var data = req.body;
 
-	var aux = '' +  Math.random() * (99999 - 10000) + 10000;
-	var pass = aux;
-	crypto.createHash('md5').update(pass).digest("hex");
+	var aux = '' + Math.round(Math.random() * (99999 - 10000) + 10000);
+	var pass = crypto.createHash('md5').update(aux).digest("hex");
+	
 
 	conn.query('UPDATE AIDAVEC_USER SET USR_SENHA = \'' + [pass] + '\' WHERE USR_EMAIL = \'' + [data.USR_EMAIL] + '\'', function(err,result){
-		sendPassEmail(data.USR_EMAIL, aux);
+		SendPassMail(data.USR_EMAIL, aux);
 
 		return res.json(result);
 	});
@@ -674,7 +674,7 @@ function SendPassMail(address, pass) {
   		from: 'contato@mobila.com.br', // Quem enviou este e-mail
   		to: address, // Quem receberá
   		subject: 'Senha provisória',  // Um assunto bacana :-) 
-  		html: 'Olá !<br><br>Conforme solicitado, geramos uma nova senha provisória para que você possa acessar o Aidavec. <br><br>Altere sua senha provisória o quanto antes. <br><br>Caso você não tenha solicitado isso, contacte o administrador. <br><br>Sua senha provisória é : ' + aux 
+  		html: 'Olá !<br><br>Conforme solicitado, geramos uma nova senha provisória para que você possa acessar o Aidavec. <br><br>Altere sua senha provisória o quanto antes. <br><br>Caso você não tenha solicitado isso, contacte o administrador. <br><br>Sua senha provisória é : ' + pass 
 	};
 
 	transporter.sendMail(email, function(err, info){
