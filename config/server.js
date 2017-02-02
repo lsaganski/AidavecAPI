@@ -312,9 +312,9 @@ app.post('/api/getcharthome', function(req, res) {
 				});
 			});
 		});
-	});*/
+	});
 
-	return res.json([{ ca: ca, cb: cb, cc: cc, cd: cd, ce: ce, cf: cf, cg: cg, ch: ch }]);		
+	//return res.json([{ ca: ca, cb: cb, cc: cc, cd: cd, ce: ce, cf: cf, cg: cg, ch: ch }]);		
 });
 
 // CRUD Get Report
