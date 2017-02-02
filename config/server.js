@@ -546,7 +546,7 @@ app.put('/api/vehicle', function(req, res) {
 	var conn = database();
  	var data = req.body;
 
-	conn.query('UPDATE AIDAVEC_VEICULO SET VEI_MARCA = \'' + [data.VEI_MARCA] + '\', VEI_MODELO = \'' + [data.VEI_MODELO] + '\', VEI_COR = \'' + [data.VEI_COR] + '\', VEI_ANO = ' + [data.VEI_ANO] + ', VEI_COBERTURA = ' + [data.VEI_COBERTURA] + ' WHERE VEI_ID = ' + [data.VEI_ID], function(err,result){
+	conn.query('UPDATE AIDAVEC_VEICULO SET VEI_MARCA = \'' + [data.VEI_MARCA] + '\', VEI_MODELO = \'' + [data.VEI_MODELO] + '\', VEI_COR = \'' + [data.VEI_COR] + '\', VEI_ANO = ' + [data.VEI_ANO] + ', VEI_COBERTURA = ' + [data.VEI_COBERTURA] + ' , VEI_STATUS = ' + [data.VEI_STATUS] + ' , VEI_OKFOTOA = ' + [data.VEI_OKFOTOA] + ' , VEI_OKFOTOB = ' + [data.VEI_OKFOTOB] + ' , VEI_OKFOTOC = ' + [data.VEI_OKFOTOC] + ' WHERE VEI_ID = ' + [data.VEI_ID], function(err,result){
 		return res.json(result);
 	});
 });
