@@ -670,17 +670,17 @@ function SendMail(address, id) {
 		var nodemailer = require('nodemailer');
 
 	   	var transporter = nodemailer.createTransport({
-		    host: 'smtp.mobila.com.br',
-		    port: 587,
-		    secure: false, // use SSL
+		    host: 'srv58.prodns.com.br',
+		    port: 465,
+		    secure: true, // use SSL
 		    auth: {
-		        user: 'contato@mobila.com.br',
-		        pass: '1978@Mobila'
+		        user: 'no-reply@aidavec.com.br',
+		        pass: 'nrp@aidavec901'
 		    }
 		});
 
 		var email = {
-	  		from: 'contato@mobila.com.br', // Quem enviou este e-mail
+	  		from: 'no-reply@aidavec.com.br', // Quem enviou este e-mail
 	  		to: address, // Quem receberá
 	  		subject: 'Confirme seu cadastro',  // Um assunto bacana :-) 
 //	  		html: 'Bem vindo !<br><br>Você fez um novo cadastro no Aidavec.<br><br>Para começar a usar o aplicativo é necessário ativar seu cadastro, clicando no link abaixo :<br><br><a href="http://www.mobila.kinghost.net/aidavecapi/api/active/user/' + hashed + '">Ativar cadastro</a>' // O conteúdo do e-mail
@@ -701,17 +701,17 @@ function SendPassMail(address, pass) {
 	var nodemailer = require('nodemailer');
 
    	var transporter = nodemailer.createTransport({
-	    host: 'smtp.mobila.com.br',
-	    port: 587,
-	    secure: false, // use SSL
+	    host: 'srv58.prodns.com.br',
+	    port: 465,
+	    secure: true, // use SSL
 	    auth: {
-	        user: 'contato@mobila.com.br',
-	        pass: '1978@Mobila'
+	        user: 'no-reply@aidavec.com.br',
+	        pass: 'nrp@aidavec901'
 	    }
 	});
 
 	var email = {
-  		from: 'contato@mobila.com.br', // Quem enviou este e-mail
+  		from: 'no-reply@aidavec.com.br', // Quem enviou este e-mail
   		to: address, // Quem receberá
   		subject: 'Senha provisória',  // Um assunto bacana :-) 
   		html: 'Olá !<br><br>Conforme solicitado, geramos uma nova senha provisória para que você possa acessar o Aidavec. <br><br>Altere sua senha provisória o quanto antes. <br><br>Caso você não tenha solicitado isso, contacte o administrador. <br><br>Sua senha provisória é : ' + pass 
