@@ -129,18 +129,22 @@ app.post('/api/getchartsemanal', function(req, res) {
 	fim.setHours(23, 59, 59);
 
 	var query = 'SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'';
-
+console.log(query);
 	conn.query(query, function(err, rows, fields){
-		seg = rows[0].TOTAL;
-
-		// TERCA
+		if (err)
+			console.log(err) 
+		else
+			seg = rows[0].TOTAL;
+ 
+ 		// TERCA
 		inicio = new Date(inicio.setDate(inicio.getDate() + 1));
 		inicio.setHours(0, 0, 0);
 		fim = new Date(inicio);
 		fim.setHours(23, 59, 59);
 
 		conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-			ter = rows[0].TOTAL;
+			if (rows.length > 0) 
+				ter = rows[0].TOTAL;
 
 			// QUARTA
 			inicio = new Date(inicio.setDate(inicio.getDate() + 1));
@@ -149,7 +153,8 @@ app.post('/api/getchartsemanal', function(req, res) {
 			fim.setHours(23, 59, 59);
 			
 			conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-				qua = rows[0].TOTAL;
+				if (rows.length > 0) 
+					qua = rows[0].TOTAL;
 
 				// QUINTA
 				inicio = new Date(inicio.setDate(inicio.getDate() + 1));
@@ -158,7 +163,8 @@ app.post('/api/getchartsemanal', function(req, res) {
 				fim.setHours(23, 59, 59);
 				
 				conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-					qui = rows[0].TOTAL;
+					if (rows.length > 0) 
+						qui = rows[0].TOTAL;
 
 					// SEXTA
 					inicio = new Date(inicio.setDate(inicio.getDate() + 1));
@@ -167,7 +173,8 @@ app.post('/api/getchartsemanal', function(req, res) {
 					fim.setHours(23, 59, 59);
 
 					conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-						sex = rows[0].TOTAL;
+						if (rows.length > 0) 
+							sex = rows[0].TOTAL;
 
 						// SABADO
 						inicio = new Date(inicio.setDate(inicio.getDate() + 1));
@@ -176,7 +183,8 @@ app.post('/api/getchartsemanal', function(req, res) {
 						fim.setHours(23, 59, 59);
 						
 						conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-							sab = rows[0].TOTAL;
+							if (rows.length > 0) 
+								sab = rows[0].TOTAL;
 
 							// DOMINGO
 							inicio = new Date(inicio.setDate(inicio.getDate() + 1));
@@ -185,7 +193,9 @@ app.post('/api/getchartsemanal', function(req, res) {
 							fim.setHours(23, 59, 59);
 
 							conn.query('SELECT IFNULL(SUM(WAY_PERCORRIDO), 0) as TOTAL FROM AIDAVEC_WAYPOINT WHERE USR_ID = ' + data.USR_ID + ' AND WAY_DATE >= \'' + getStrDateTime(inicio) + '\' AND WAY_DATE <= \'' + getStrDateTime(fim) + '\'', function(err, rows, fields){
-								dom = rows[0].TOTAL;
+								if (rows.length > 0) 
+									dom = rows[0].TOTAL;
+
 								return res.json([{ dom: dom, ter: ter, qua: qua, qui: qui, sex: sex, sab: sab }]);		
 							});
 						});
