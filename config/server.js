@@ -9,6 +9,7 @@ var formidable = require('formidable');
 var fs = require('fs');
 var crypto = require('crypto');
 
+
 app.use(bodyparser.urlencoded({
 	extended: true
 }));
@@ -510,22 +511,13 @@ app.post('/api/waypoints', function(req, res) {
  	for (var index in data.waypoints) {
  		var waypoint = data.waypoints[index];
 
-		var query = 'SELECT * FROM AIDAVEC_WAYPOINT WHERE WAY_DATE = \'' + waypoint.way_date + '\'' ;
-		console.log(query);
-		conn.query(query, function(err, rows, fields) {
-			if (!err && rows.length == 0) {
-		 		SaveWaypoint(waypoint, conn);
-			}
-		});
+ 		SaveWaypoint(waypoint, conn);
 
  		if (success == false) 
  			break;
 	};
 
-	if (auxResult == null) 
-		return res.json({ error: error });	
-	else
-		return res.json(auxResult);
+	return res.json({ success: success });	  
 });
 
 // CRUD Update
@@ -661,35 +653,46 @@ app.delete('/api/:tablename/:id', function(req, res) {
 //------------------------------------------------------
 
 function SaveWaypoint(data, conn) {
-	conn.query('INSERT INTO AIDAVEC_WAYPOINT SET ? ', [data], function(err,result){
 
-		if (err)
-			success = false;
+	var query = 'SELECT * FROM AIDAVEC_WAYPOINT WHERE WAY_DATE = \'' + data.way_date + '\'' ;
+	console.log(query);
+	conn.query(query, function(err, rows, fields) {
+		if (!err && rows.length == 0) {
 
-		auxResult = result;
+			conn.query('INSERT INTO AIDAVEC_WAYPOINT SET ? ', [data], function(err,result){
 
-		var curDate; 
+				if (err)
+					success = false;
 
-		var query = 'SELECT * FROM AIDAVEC_CAMPANHA WHERE CAM_INICIO <= \'' + data.way_date + '\' AND CAM_FIM >= \'' + data.way_date + '\' AND CAM_STATUS = 1';
-		console.log(query);
-		conn.query(query, function(err, rows, fields) {
-		    if (err) throw err;
+				auxResult = result;
 
-		    for (var i in rows) {
-		    	query = 'UPDATE AIDAVEC_CAMPANHA_USUARIO SET CAU_DISTANCIA = CAU_DISTANCIA + ' + data.way_percorrido + ', CAU_PONTUACAO = CAU_PONTUACAO + ' + data.way_percorrido + ' WHERE USR_ID = ' + data.usr_id + ' AND CAM_ID = ' + rows[i].CAM_ID;
-		    	console.log(query);
-    			conn.query(query, function(err,result){
+				var curDate; 
 
-					if (err) {
-						success = false;
-						console.log('erro no update pontuacao');
-					}
+				var query = 'SELECT * FROM AIDAVEC_CAMPANHA WHERE CAM_INICIO <= \'' + data.way_date + '\' AND CAM_FIM >= \'' + data.way_date + '\' AND CAM_STATUS = 1';
+				console.log(query);
+				conn.query(query, function(err, rows, fields) {
+				    if (err) throw err;
+
+				    for (var i in rows) {
+				    	query = 'UPDATE AIDAVEC_CAMPANHA_USUARIO SET CAU_DISTANCIA = CAU_DISTANCIA + ' + data.way_percorrido + ', CAU_PONTUACAO = CAU_PONTUACAO + ' + data.way_percorrido + ' WHERE USR_ID = ' + data.usr_id + ' AND CAM_ID = ' + rows[i].CAM_ID;
+				    	console.log(query);
+		    			conn.query(query, function(err,result){
+
+							if (err) {
+								success = false;
+								console.log('erro no update pontuacao');
+							}
+						});
+				    }
 				});
-		    }
-		});
+			});
+
+		} 
 
 		return true;
 	});
+
+
 }
 
 function SendMail(address, id) {
