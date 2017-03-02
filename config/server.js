@@ -105,7 +105,17 @@ app.post('/api/getnotes/', function(req, res) {
 	var conn = database();
 	var data = req.body;
 
-	conn.query('SELECT * FROM AIDAVEC_NOTIFICACAO WHERE USR_ID = ' + data.USR_ID, function(err,result){
+	conn.query('SELECT * FROM AIDAVEC_NOTIFICACAO WHERE USR_ID IS NULL OR USR_ID = ' + data.USR_ID, function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Get Answers
+app.post('/api/getanswers/', function(req, res) {
+	var conn = database();
+	var data = req.body;
+
+	conn.query('SELECT * FROM AIDAVEC_RESPOSTA WHERE USR_ID = ' + data.USR_ID + ' AND NOT_ID = ' + data.NOT_ID, function(err,result){
 		return res.json(result);
 	});
 });
@@ -493,7 +503,11 @@ app.post('/api/notes', function(req, res) {
 	var conn = database();
 	var data = req.body;
 
+console.log('user is : ' + data.USR_ID)
 	conn.query('INSERT INTO AIDAVEC_NOTIFICACAO SET ? ', [data], function(err,result){
+
+		InsertResposta(data, result.insertId); 
+
 		if (data.NOT_PUSH == 1)
 			SendPush(data);
 
@@ -590,6 +604,16 @@ app.put('/api/note', function(req, res) {
  	var data = req.body;
 
 	conn.query('UPDATE AIDAVEC_NOTIFICACAO SET USR_ID = ' + [data.USR_ID] + ', NOT_TITULO = \'' + [data.NOT_TITULO] + '\', NOT_MENSAGEM = \'' + [data.NOT_MENSAGEM] + '\', NOT_OPCAOA = \'' + [data.NOT_OPCAOA] + '\', NOT_OPCAOB = \'' + [data.NOT_OPCAOB] + '\', NOT_OPCAOC = \'' + [data.NOT_OPCAOC] + '\', NOT_OPCAOD = \'' + [data.NOT_OPCAOD] + '\', NOT_OPCAOE = \'' + [data.NOT_OPCAOE] + '\', NOT_TIPO = ' + [data.NOT_TIPO] + ', NOT_PUSH = ' + [data.NOT_PUSH] + ', NOT_RESPOSTA = \'' + [data.NOT_RESPOSTA] + '\' WHERE NOT_ID = ' + [data.NOT_ID], function(err,result){
+		return res.json(result);
+	});
+});
+
+// CRUD Update
+app.put('/api/answer', function(req, res) {
+	var conn = database();
+ 	var data = req.body;
+
+	conn.query('UPDATE AIDAVEC_RESPOSTA SET RES_RESPOSTA = \'' + [data.RES_RESPOSTA] + '\' WHERE USR_ID = ' + [data.USR_ID] + ' AND NOT_ID = ' + [data.NOT_ID], function(err,result){
 		return res.json(result);
 	});
 });
@@ -786,6 +810,7 @@ function SendPush(data) {
 	    if (err) throw err;
 
 	    for (var i in rows) {
+
 	        var message = {
 			    to: rows[i].USR_DEVICE, // required fill with device token or topics
 	//		    collapse_key: 'your_collapse_key', 
@@ -820,6 +845,32 @@ function SendPush(data) {
 	    }
 
 
+	});
+}
+
+function InsertResposta(data, not_id) {
+	var conn = database();
+
+	var query = '';
+
+	if (data.USR_ID != null && data.USR_ID.length > 0) {
+		query = 'SELECT * FROM AIDAVEC_USER WHERE USR_ID = ' + data.USR_ID;
+	} else {
+		query = 'SELECT * FROM AIDAVEC_USER';
+	}
+
+	conn.query(query, function(err, rows, fields) {
+	    if (err) throw err;
+
+	    for (var i in rows) {
+
+	    	query = 'INSERT INTO AIDAVEC_RESPOSTA (NOT_ID, USR_ID) VALUES (' + not_id + ', ' + rows[i].USR_ID + ')';
+			conn.query(query, function(err,result){
+
+				if (err) throw err;
+
+			});
+	    }
 	});
 }
 
